@@ -1,11 +1,36 @@
-import React from 'react';
+import React, {Component} from 'react';
+import RegisterForm from './RegisterForm';
 
-const Home = () => {
-  return (
-    <div className="hero">
-      <h1>Welcome to Meep</h1>
-    </div>
-  )
-}
+
+class Home extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      postType: null,
+    }
+
+  }
+
+
+
+  render() {
+
+
+
+    return (
+      <div className="hero">
+        <h1>Home Page</h1>
+        <RegisterForm
+          postType = {this.state.postType}
+          handleInputChange = {this.handleInputChange}
+          handleLoginSubmit = {this.handleLoginSubmit}
+          handleRegisterSubmit = {this.props.handleRegisterSubmit}
+        />
+      </div>
+    )
+
+
+  }//end of render
+}//END OF CLASS
 
 export default Home;

@@ -26,8 +26,22 @@ class ProfilesController < ApiController
     end
   end
 
+  def update
+    if profile.update(update_params)
+      render json: {
+        message: 'ok',
+        profile: profile,
+      }
+    else
+      render json: {message: 'could not update profile'}
+  end
+
   private
   def profile_params
+    params.require(:profile).permit(:facebook, :instagram, :google, :linkedin, :twitter)
+  end
+
+  def update_params
     params.require(:profile).permit(:facebook, :instagram, :google, :linkedin, :twitter)
   end
 

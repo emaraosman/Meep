@@ -3,5 +3,6 @@ Rails.application.routes.draw do
   post   "/login"       => "sessions#create"
   delete "/logout"      => "sessions#destroy"
   get "/profile"        => "users#profile"
-  resources :users
+  resources :users, only: [:new, :create, :show]
+  resources :profile, only: [:show, :edit]
 end
