@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import './App.css';
+import axios from 'axios';
 
 import { BrowserRouter as Router, Link, Route, Redirect } from 'react-router-dom';
 import Auth from './modules/Auth';
@@ -29,6 +30,11 @@ class App extends Component {
       twitterURL: '',
       googleURL: '',
       linkedinURL: '',
+      //profile Data:
+      userData: '',
+      userDataLoaded: false,
+      profileData: null,
+      profileDataLoaded: false,
     }
 
     this.resetFireRedirect = this.resetFireRedirect.bind(this);
@@ -55,8 +61,28 @@ handleInputChange(e) {
     }
   }
 
+// +++++++++++++++++++++++++++++++++++++
+
+  componentDidMount() {
+      this.resetFireRedirect()
+      axios('/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${Auth.getToken()}`,
+          token: `${Auth.getToken()}`,
+        }
+      }).then(res => {
+        this.setState({
+          userData: res.data.user,
+          userDataLoaded: true,
+          profileData: res.data.profiles,
+          profileDataLoaded: true,
+        })
+      })
+    }
 
 // +++++++++++++++++++++++++++++++++++++
+
   handleLoginSubmit(e) {
       const Auth = this.props.auth
       e.preventDefault();
@@ -89,6 +115,7 @@ handleInputChange(e) {
     }
     // -------------------------------------
 
+
     // +++++++++++++++++++++++++++++++++++++
     handleRegisterSubmit(e) {
           const Auth = this.props.auth
@@ -101,6 +128,37 @@ handleInputChange(e) {
               password: this.state.registerPassword,
               email: this.state.registerEmail,
               name: this.state.registerName,
+            }
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }).then(res => res.json())
+        .then(res => {
+          if (res.token) {
+            Auth.authenticateToken(res.token);
+            this.setState({
+              auth: Auth.isUserAuthenticated(),
+            })
+          }
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+    // -------------------------------------
+    // +++++++++++++++++++++++++++++++++++++
+    handleProfileEdit(e) {
+          const Auth = this.props.auth
+        e.preventDefault();
+        fetch('/users', {
+          method: 'POST',
+          body: JSON.stringify({
+            profiles: {
+              facebookURL: this.state.facebookURL,
+              instagramURL: this.state.twitterURL,
+              twitterURL: this.state.twitterURL,
+              googleURL: this.state.googleURL,
+              linkedinURL: this.state.linkedinURL,
             }
           }),
           headers: {
@@ -152,43 +210,41 @@ handleInputChange(e) {
           shouldFireRedirect={this.state.shouldFireRedirect}
           //Login Form States:
           loginUserName={this.state.loginUserName}
-          loginPassword={this.state.loginPassword}/>
-        <Home
-          auth={this.state.auth}
-          shouldFireRedirect={this.state.shouldFireRedirect}
-          //Login Form States:
-          handleRegisterSubmit={this.handleRegisterSubmit}
-          loginUserName={this.state.loginUserName}
           loginPassword={this.state.loginPassword}
-          //Register Form states:
-          registerUserName={this.state.registerUserName}
-          registerEmail={this.state.registerEmail}
-          registerName={this.state.registerName}
-          registerPassword={this.state.registerPassword}
         />
 
-      </div>
-      <Route
-        exact
-        path="/register"
-        render={() =>
-          !this.state.auth ? (
+
+        { this.state.auth ? (
             <ProfileSingle
-              auth={this.state.auth}
-              registerUserName={this.state.registerUsername}
-              registerPassword={this.state.registerPassword}
-              registerEmail={this.state.registerEmail}
-              registerName={this.state.registerName}
               handleInputChange={this.handleInputChange}
-              handleRegisterSubmit={this.handleRegisterSubmit}
+              userData={this.state.userData}
+              userDataLoaded={this.state.userDataLoaded}
+              profileData={this.state.profileData}
+              profileDataLoaded={this.state.profileDataLoaded}
             />
           ) : (
-            <Redirect to="/home" />
-          )}
-        />
+            <Home
+              auth={this.state.auth}
+              shouldFireRedirect={this.state.shouldFireRedirect}
+              //Login Form States:
+              handleRegisterSubmit={this.handleRegisterSubmit}
+              loginUserName={this.state.loginUserName}
+              loginPassword={this.state.loginPassword}
+              //Register Form states:
+              registerUserName={this.state.registerUserName}
+              registerEmail={this.state.registerEmail}
+              registerName={this.state.registerName}
+              registerPassword={this.state.registerPassword}
+            />
+          )
+        }
+
+
+      </div>
       </Router>
-    );
-  }
+
+    )//end of return
+  } //End of render
 
 } //END OF CLASS
 
