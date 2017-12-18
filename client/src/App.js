@@ -84,7 +84,6 @@ handleInputChange(e) {
 // +++++++++++++++++++++++++++++++++++++
 
   handleLoginSubmit(e) {
-      const Auth = this.props.auth
       e.preventDefault();
       fetch('/login', {
         method: 'POST',
@@ -95,7 +94,7 @@ handleInputChange(e) {
         headers: {
           'Content-Type': 'application/json',
         }
-      }).then(res => res.json()) //ICHANGED THIS TO res.BODY AHHH ????
+      }).then(res => res.json())
       .then(res => {
         console.log(res);
         if (res.token) {
@@ -118,7 +117,6 @@ handleInputChange(e) {
 
     // +++++++++++++++++++++++++++++++++++++
     handleRegisterSubmit(e) {
-          const Auth = this.props.auth
         e.preventDefault();
         fetch('/users', {
           method: 'POST',
@@ -190,7 +188,7 @@ handleInputChange(e) {
     this.setState({
       auth: Auth.isUserAuthenticated(),
       loginUserName: '',
-      loginUserPassword: '',
+      loginPassword: '',
     })
   })
 }
@@ -204,6 +202,7 @@ handleInputChange(e) {
       <Router>
       <div className="App">
         <Nav
+          logoutUser={this.logoutUser}
           handleLoginSubmit = {this.handleLoginSubmit}
           handleInputChange ={this.handleInputChange}
           auth={this.state.auth}
@@ -215,6 +214,8 @@ handleInputChange(e) {
 
 
         { this.state.auth ? (
+        <Route exact path="/profile"
+          render={() =>
             <ProfileSingle
               handleInputChange={this.handleInputChange}
               userData={this.state.userData}
@@ -222,19 +223,25 @@ handleInputChange(e) {
               profileData={this.state.profileData}
               profileDataLoaded={this.state.profileDataLoaded}
             />
+          }
+        />
           ) : (
-            <Home
-              auth={this.state.auth}
-              shouldFireRedirect={this.state.shouldFireRedirect}
-              //Login Form States:
-              handleRegisterSubmit={this.handleRegisterSubmit}
-              loginUserName={this.state.loginUserName}
-              loginPassword={this.state.loginPassword}
-              //Register Form states:
-              registerUserName={this.state.registerUserName}
-              registerEmail={this.state.registerEmail}
-              registerName={this.state.registerName}
-              registerPassword={this.state.registerPassword}
+            <Route exact path="/"
+              render={() =>
+              <Home
+                auth={this.state.auth}
+                shouldFireRedirect={this.state.shouldFireRedirect}
+                //Login Form States:
+                handleRegisterSubmit={this.handleRegisterSubmit}
+                loginUserName={this.state.loginUserName}
+                loginPassword={this.state.loginPassword}
+                //Register Form states:
+                registerUserName={this.state.registerUserName}
+                registerEmail={this.state.registerEmail}
+                registerName={this.state.registerName}
+                registerPassword={this.state.registerPassword}
+                />
+              }
             />
           )
         }
