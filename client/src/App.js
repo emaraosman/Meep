@@ -9,6 +9,9 @@ import Nav from './components/Nav';
 import Home from './components/Home';
 import RegisterForm from './components/RegisterForm';
 import ProfileSingle from './components/ProfileSingle'
+import ProfileEdit from './components/ProfileEdit'
+
+
 
 class App extends Component {
   constructor(){
@@ -16,6 +19,7 @@ class App extends Component {
     this.state = {
       auth: Auth.isUserAuthenticated(),
       shouldFireRedirect: false,
+      id: null,
       //Login Form States:
       loginUserName: '',
       loginPassword: '',
@@ -35,6 +39,8 @@ class App extends Component {
       userDataLoaded: false,
       profileData: null,
       profileDataLoaded: false,
+      //component displayed
+      dashboard: 'home',
     }
 
     this.resetFireRedirect = this.resetFireRedirect.bind(this);
@@ -42,7 +48,7 @@ class App extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
-
+    this.getUserData = this.getUserData.bind(this);
   }
 
 handleInputChange(e) {
@@ -63,20 +69,23 @@ handleInputChange(e) {
 
 // +++++++++++++++++++++++++++++++++++++
 
-  componentDidMount() {
+  getUserData() {
       this.resetFireRedirect()
-      axios('/profile', {
+      fetch(`/profiles/${this.state.id}`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${Auth.getToken()}`,
           token: `${Auth.getToken()}`,
         }
-      }).then(res => {
+      }).then(res => res.json())
+      .then(res => {
+        console.log("the res bro: ",res)
         this.setState({
-          userData: res.data.user,
+          userData: res.username,
           userDataLoaded: true,
-          profileData: res.data.profiles,
+          profileData: res.profile,
           profileDataLoaded: true,
+          dashboard: 'single',
         })
       })
     }
@@ -103,7 +112,10 @@ handleInputChange(e) {
             auth: Auth.isUserAuthenticated(),
             loginUserName: '',
             loginUserPassword: '',
+            id: res.id,
+
           })
+          this.getUserData()
         }
         else{
           alert("login failed")
@@ -118,15 +130,17 @@ handleInputChange(e) {
     // +++++++++++++++++++++++++++++++++++++
     handleRegisterSubmit(e) {
         e.preventDefault();
+        const newUser = {
+          username: this.state.registerUserName,
+          password: this.state.registerPassword,
+          email: this.state.registerEmail,
+          name: this.state.registerName,
+        };
+        console.log(newUser);
         fetch('/users', {
           method: 'POST',
           body: JSON.stringify({
-            user: {
-              username: this.state.registerUserName,
-              password: this.state.registerPassword,
-              email: this.state.registerEmail,
-              name: this.state.registerName,
-            }
+            user: newUser,
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -137,6 +151,7 @@ handleInputChange(e) {
             Auth.authenticateToken(res.token);
             this.setState({
               auth: Auth.isUserAuthenticated(),
+              dashboard: 'edit'
             })
           }
         }).catch(err => {
@@ -212,39 +227,59 @@ handleInputChange(e) {
           loginPassword={this.state.loginPassword}
         />
 
-
-        { this.state.auth ? (
-        <Route exact path="/profile"
-          render={() =>
-            <ProfileSingle
-              handleInputChange={this.handleInputChange}
-              userData={this.state.userData}
-              userDataLoaded={this.state.userDataLoaded}
-              profileData={this.state.profileData}
-              profileDataLoaded={this.state.profileDataLoaded}
-            />
-          }
-        />
-          ) : (
-            <Route exact path="/"
-              render={() =>
-              <Home
-                auth={this.state.auth}
-                shouldFireRedirect={this.state.shouldFireRedirect}
-                //Login Form States:
-                handleRegisterSubmit={this.handleRegisterSubmit}
-                loginUserName={this.state.loginUserName}
-                loginPassword={this.state.loginPassword}
-                //Register Form states:
-                registerUserName={this.state.registerUserName}
-                registerEmail={this.state.registerEmail}
-                registerName={this.state.registerName}
-                registerPassword={this.state.registerPassword}
-                />
-              }
-            />
-          )
+      <Route exact path='/' render={() =>
+        <Home
+          auth={this.state.auth}
+          shouldFireRedirect={this.state.shouldFireRedirect}
+          //Login Form States:
+          handleRegisterSubmit={this.handleRegisterSubmit}
+          loginUserName={this.state.loginUserName}
+          loginPassword={this.state.loginPassword}
+          handleInputChange={this.handleInputChange}
+          //Register Form states:
+          registerUserName={this.state.registerUserName}
+          registerEmail={this.state.registerEmail}
+          registerName={this.state.registerName}
+          registerPassword={this.state.registerPassword}
+          />
         }
+        />
+
+
+      <Route exact path={`/profile`} render={() =>
+        this.state.profileDataLoaded ? (
+          <ProfileSingle
+            handleInputChange={this.handleInputChange}
+            userData={this.state.userData}
+            userDataLoaded={this.state.userDataLoaded}
+            profileData={this.state.profileData}
+            profileDataLoaded={this.state.profileDataLoaded}
+          />
+        ):(
+          <p>Loading...</p>
+        )}
+      />
+
+
+      <Route exact path={`/profile/edit`} render={() =>
+        this.state.profileDataLoaded ? (
+          <ProfileEdit
+            handleInputChange={this.handleInputChange}
+            userData={this.state.userData}
+            userDataLoaded={this.state.userDataLoaded}
+            profileData={this.state.profileData}
+            profileDataLoaded={this.state.profileDataLoaded}
+            facebookURL={this.state.facebookURL}
+            instagramURL={this.state.instagramURL}
+            twitterURL={this.state.twitterURL}
+            googleURL={this.state.googleURL}
+            linkedinURL={this.state.linkedinURL}
+          />
+        ):(
+          <p>Loading...</p>
+        )}
+      />
+
 
 
       </div>

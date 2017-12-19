@@ -7,7 +7,7 @@ class ProfilesController < ApiController
   end
 
   def show
-    profile = Profile.find(params[:id])
+    profile = Profile.find_by(user_id: params[:id])
     profile_user = profile.user
     render json: { profile: profile, username: profile_user.username }
   end
@@ -34,6 +34,7 @@ class ProfilesController < ApiController
       }
     else
       render json: {message: 'could not update profile'}
+    end
   end
 
   private

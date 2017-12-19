@@ -5,9 +5,13 @@ function ProfileSingle (props) {
 
   return (
     <div>
-      <h3>{props.userData.name}</h3>
+      <h1>Profile Page</h1>
+      <h3>{props.userData.username}</h3>
       <p>{props.profileData.facebook}</p>
-      {(props.profile.username) ? <p className="user">{props.profile.username}</p> : '' }
+      <p>{props.profileData.instagram}</p>
+      <p>{props.profileData.twitter}</p>
+      <p>{props.profileData.linkedin}</p>
+      <p>{props.profileData.google}</p>
     </div>
   )//end of return
 

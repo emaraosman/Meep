@@ -3,8 +3,8 @@ class User < ApplicationRecord
   has_secure_password
   has_secure_token :auth_token
 
-  has_many :profiles
-  
+  has_one :profile
+
   def invalidate_token
     self.update_columns(auth_token: nil)
   end

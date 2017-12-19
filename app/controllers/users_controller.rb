@@ -2,6 +2,7 @@ class UsersController < ApiController
   before_action :require_login, except: [:create]
 
   def create
+    puts user_params
     user = User.create!(user_params)
     render json: { token: user.auth_token }
   end
@@ -11,7 +12,7 @@ class UsersController < ApiController
     user_profiles = Profile.where(user_id: user.id)
     render json: {
       user: { username: user.username, email: user.email, name: user.name },
-      profiles: user_profiles,
+      profile: user_profile,
     }
   end
 

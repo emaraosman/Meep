@@ -22,8 +22,8 @@ class Home extends Component {
         <h1>Home Page</h1>
         <RegisterForm
           postType = {this.state.postType}
-          handleInputChange = {this.handleInputChange}
-          handleLoginSubmit = {this.handleLoginSubmit}
+          handleInputChange = {this.props.handleInputChange}
+          handleLoginSubmit = {this.props.handleLoginSubmit}
           handleRegisterSubmit = {this.props.handleRegisterSubmit}
         />
       </div>

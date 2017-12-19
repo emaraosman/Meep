@@ -1,6 +1,7 @@
 import React from 'react';
 
 function RegisterForm (props) {
+  console.log(props);
   return (
     <div className="registerform">
       <form onSubmit={props.handleRegisterSubmit}>
@@ -11,6 +12,7 @@ function RegisterForm (props) {
           onChange={props.handleInputChange}
           placeholder="Username"
         />
+        <br />
         <input
           type="password"
           name="registerPassword"
@@ -18,6 +20,7 @@ function RegisterForm (props) {
           onChange={props.handleInputChange}
           placeholder="Password"
         />
+        <br />
         <input
           type="email"
           name="registerEmail"
@@ -25,6 +28,7 @@ function RegisterForm (props) {
           onChange={props.handleInputChange}
           placeholder="Email"
         />
+        <br />
         <input
           type="text"
           name="registerName"
@@ -32,6 +36,7 @@ function RegisterForm (props) {
           onChange={props.handleInputChange}
           placeholder="Name"
         />
+        <br />
         <input type="submit" value="Register!" />
       </form>
     </div>
