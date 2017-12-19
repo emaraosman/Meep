@@ -39,7 +39,7 @@ function ProfileEdit (props) {
         <input
           type="text"
           name="linkedinURL"
-          value={props.profileData.linkedin}
+          value={props.profileData.linkedinURL}
           onChange={props.handleInputChange}
           placeholder="LinkedIn URL"
         />
