@@ -7,9 +7,9 @@ class ProfilesController < ApiController
   end
 
   def show
-    profile = Profile.find_by(user_id: params[:id])
-    profile_user = profile.user
-    render json: { profile: profile, username: profile_user.username }
+    user = User.find_by(username: params[:username])
+    profile = user.profile
+    render json: { profile: profile, username: user.username }
   end
 
   def create
@@ -26,7 +26,9 @@ class ProfilesController < ApiController
     end
   end
 
+
   def update
+    profile = Profile.find_by(id: params[:id])
     if profile.update(update_params)
       render json: {
         message: 'ok',

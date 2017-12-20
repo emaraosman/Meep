@@ -1,13 +1,16 @@
 import React from 'react';
 
 function ProfileEdit (props) {
+
+  props.resetFireRedirect()
+
   return (
-    <div className="profileform">
-      <form onSubmit={props.handleRegisterSubmit}>
+    <div className="profile-form">
+      <form onSubmit={props.handleEditUser}>
         <input
           type="text"
           name="facebookURL"
-          value={props.profileData.facebook}
+          value={props.facebookURL}
           onChange={props.handleInputChange}
           placeholder="Facebook URL"
         />
@@ -15,7 +18,7 @@ function ProfileEdit (props) {
         <input
           type="text"
           name="instagramURL"
-          value={props.profileData.instagram}
+          value={props.instagramURL}
           onChange={props.handleInputChange}
           placeholder="Instagram URL"
         />
@@ -23,7 +26,7 @@ function ProfileEdit (props) {
         <input
           type="text"
           name="twitterURL"
-          value={props.profileData.twitter}
+          value={props.twitterURL}
           onChange={props.handleInputChange}
           placeholder="Twitter URL"
         />
@@ -31,7 +34,7 @@ function ProfileEdit (props) {
         <input
           type="text"
           name="googleURL"
-          value={props.profileData.google}
+          value={props.googleURL}
           onChange={props.handleInputChange}
           placeholder="Google+ URL"
         />
@@ -39,7 +42,7 @@ function ProfileEdit (props) {
         <input
           type="text"
           name="linkedinURL"
-          value={props.profileData.linkedinURL}
+          value={props.linkedinURL}
           onChange={props.handleInputChange}
           placeholder="LinkedIn URL"
         />

@@ -2,7 +2,7 @@ import React from 'react';
 
 function ProfileSingle (props) {
 
-
+  props.resetFireRedirect()
   return (
     <div>
       <h1>Profile Page</h1>

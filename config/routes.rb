@@ -4,5 +4,8 @@ Rails.application.routes.draw do
   delete "/logout"      => "sessions#destroy"
   get "/sessions"        => "users#sessions"
   resources :users, only: [:new, :create, :show]
-  resources :profiles, only: [:show, :edit]
+  resources :profiles, only: [ :update]
+  get "/user/:username" => "profiles#show"
+  get "/:username" => "profiles#show"
+
 end

@@ -9,8 +9,8 @@ import Nav from './components/Nav';
 import Home from './components/Home';
 import RegisterForm from './components/RegisterForm';
 import ProfileSingle from './components/ProfileSingle'
-import ProfileEdit from './components/ProfileEdit'
-
+import ProfileEdit from './components/ProfileEdit';
+import UserProfile from './components/UserProfile';
 
 
 class App extends Component {
@@ -40,7 +40,7 @@ class App extends Component {
       profileData: null,
       profileDataLoaded: false,
       //component displayed
-      dashboard: 'home',
+      show: 'home',
     }
 
     this.resetFireRedirect = this.resetFireRedirect.bind(this);
@@ -48,10 +48,10 @@ class App extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
-    this.getUserData = this.getUserData.bind(this);
+    this.handleEditUser=this.handleEditUser.bind(this);
   }
 
-handleInputChange(e) {
+  handleInputChange(e) {
     const name = e.target.name;
     const value = e.target.value;
     this.setState({
@@ -68,27 +68,45 @@ handleInputChange(e) {
   }
 
 // +++++++++++++++++++++++++++++++++++++
-
-  getUserData() {
-      this.resetFireRedirect()
-      fetch(`/profiles/${this.state.id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Token ${Auth.getToken()}`,
-          token: `${Auth.getToken()}`,
-        }
-      }).then(res => res.json())
-      .then(res => {
-        console.log("the res bro: ",res)
-        this.setState({
-          userData: res.username,
-          userDataLoaded: true,
-          profileData: res.profile,
-          profileDataLoaded: true,
-          dashboard: 'single',
-        })
-      })
+getUserData(){
+  this.props.resetFireRedirect()
+  fetch('/profile/edit', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Token ${Auth.getToken()}`,
+      token: `${Auth.getToken()}`,
     }
+  }).then(res => {
+    this.setState({
+      userData: res.data.user,
+      userDataLoaded: true,
+    })
+  })
+}
+
+// +++++++++++++++++++++++++++++++++++++
+getUserProfiles(){
+    this.resetFireRedirect()
+    fetch(`/user/${this.props.username}`, {
+      method: 'GET',
+    }).then(res => res.json())
+    .then(res => {
+      console.log("the response: ",res)
+      this.setState({
+        userData: res.username,
+        userDataLoaded: true,
+        profileData: res.profile,
+        profileDataLoaded: true,
+        show: 'single',
+        facebook: res.profile.facebook,
+        instagramURL: res.profile.instagram,
+        twitterURL: res.profile.twitter,
+        googleURL: res.profile.google,
+        linkedinURL: res.profile.linkedin,
+      })
+    })
+  }
+
 
 // +++++++++++++++++++++++++++++++++++++
 
@@ -105,17 +123,22 @@ handleInputChange(e) {
         }
       }).then(res => res.json())
       .then(res => {
-        console.log(res);
+        console.log("res from login :",res);
         if (res.token) {
           Auth.authenticateToken(res.token);
           this.setState({
             auth: Auth.isUserAuthenticated(),
-            loginUserName: '',
             loginUserPassword: '',
             id: res.id,
-
+            shouldFireRedirect: true,
+            show: "profileEdit",
+            profileDataLoaded:true,
+            facebookURL: res.profile.facebook,
+            instagramURL: res.profile.instagram,
+            twitterURL: res.profile.twitter,
+            googleURL: res.profile.google,
+            linkedinURL: res.profile.linkedin,
           })
-          this.getUserData()
         }
         else{
           alert("login failed")
@@ -151,7 +174,10 @@ handleInputChange(e) {
             Auth.authenticateToken(res.token);
             this.setState({
               auth: Auth.isUserAuthenticated(),
-              dashboard: 'edit'
+              loginUserPassword: '',
+              id: res.id,
+              shouldFireRedirect: true,
+              show: "profileEdit",
             })
           }
         }).catch(err => {
@@ -192,19 +218,55 @@ handleInputChange(e) {
     // -------------------------------------
 
   logoutUser() {
-  fetch('/logout', {
-    method: 'DELETE',
+    fetch('/logout', {
+      method: 'DELETE',
+      body: JSON.stringify({
+        profiles: {
+          facebookURL: this.state.facebookURL,
+          instagramURL: this.state.twitterURL,
+          twitterURL: this.state.twitterURL,
+          googleURL: this.state.googleURL,
+          linkedinURL: this.state.linkedinURL,
+        }
+      }),
+      headers: {
+        'Authorization': `Token ${Auth.getToken()}`,
+        token: Auth.getToken(),
+      }
+    }).then(res => {
+      Auth.deauthenticateUser();
+      this.setState({
+        auth: Auth.isUserAuthenticated(),
+        loginUserName: '',
+        loginPassword: '',
+      })
+    })
+  }
+
+// -------------------------------------
+
+handleEditUser(e){
+  e.preventDefault()
+  fetch(`/profiles/${this.state.id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      profile: {
+        facebook: this.state.facebookURL,
+        instagram: this.state.twitterURL,
+        twitter: this.state.twitterURL,
+        google: this.state.googleURL,
+        linkedin: this.state.linkedinURL,
+      }
+    }),
     headers: {
       'Authorization': `Token ${Auth.getToken()}`,
       token: Auth.getToken(),
+      'Content-Type': 'application/json',
     }
   }).then(res => {
-    Auth.deauthenticateUser();
-    this.setState({
-      auth: Auth.isUserAuthenticated(),
-      loginUserName: '',
-      loginPassword: '',
-    })
+    console.log("from edit : ",res)
+  }).catch(err => {
+    console.log(err)
   })
 }
 
@@ -212,10 +274,22 @@ handleInputChange(e) {
 
 
   render() {
-
+    let redirect = null;
+      switch (this.state.show){
+        case "profile":
+          redirect = <Redirect to="/profile" /> // todo: change this redirect to username from state
+          break
+        case "profileEdit":
+          redirect = <Redirect to="/profile/edit" />
+          break
+        default :
+          console.log("Go kiss drake")
+      }
     return (
       <Router>
+
       <div className="App">
+        {this.state.shouldFireRedirect && redirect}
         <Nav
           logoutUser={this.logoutUser}
           handleLoginSubmit = {this.handleLoginSubmit}
@@ -246,24 +320,45 @@ handleInputChange(e) {
         />
 
 
-      <Route exact path={`/profile`} render={() =>
-        this.state.profileDataLoaded ? (
-          <ProfileSingle
-            handleInputChange={this.handleInputChange}
-            userData={this.state.userData}
-            userDataLoaded={this.state.userDataLoaded}
-            profileData={this.state.profileData}
-            profileDataLoaded={this.state.profileDataLoaded}
-          />
-        ):(
-          <p>Loading...</p>
-        )}
+      <Route exact path={`/user/:username`} render={(props)=>{
+          return (
+            <UserProfile
+              username={props.match.params.username}
+
+            />
+          )
+        }}
       />
+{/*
+  <Route exact path={`/:username`} render={() =>
+    this.state.profileDataLoaded ? (
+      <ProfileSingle
+        handleInputChange={this.handleInputChange}
+        userData={this.state.userData}
+        userDataLoaded={this.state.userDataLoaded}
+        profileData={this.state.profileData}
+        profileDataLoaded={this.state.profileDataLoaded}
+        facebook={this.state.facebook}
+        instagram={this.state.instagram}
+        twitter={this.state.twitter}
+        google={this.state.google}
+        linkedin={this.state.linkedin}
+        resetFireRedirect={this.resetFireRedirect}
+      />
+    ):(
+      <p>Loading...</p>
+    )}
+  />
+  */}
+
+
 
 
       <Route exact path={`/profile/edit`} render={() =>
         this.state.profileDataLoaded ? (
           <ProfileEdit
+            handleEditUser={this.handleEditUser}
+            resetFireRedirect={this.resetFireRedirect}
             handleInputChange={this.handleInputChange}
             userData={this.state.userData}
             userDataLoaded={this.state.userDataLoaded}

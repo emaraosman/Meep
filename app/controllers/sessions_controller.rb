@@ -23,7 +23,8 @@ class SessionsController < ApiController
     def send_token_for_valid_login_of(user)
       render json: {
         token: user.auth_token,
-        id: user.id
+        id: user.id,
+        profile: user.profile,
       }
     end
 
